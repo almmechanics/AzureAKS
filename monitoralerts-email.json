@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+
+    "WorkspaceRef": {
+      "type": "string"
+    },
+
+    "ActionGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "List of action groups for alert actions separated by a semicolon"
+      }
+    },
+    "Location" :{
+      "type": "string"
+    }
+  },
+
+  "variables": {
+    "workspace": {
+      "ref": "[parameters('workspaceRef')]"
+    },
+
+    "groupIds": [
+      "[parameters('actionGroup')]"
+    ],
+
+    "alerts": [
+      {
+          "name": "container-cpu-warning",
+          "description": "container CPU warning",
+          "query": " Perf |filter TimeGenerated > now(-5m) | where ObjectName == 'K8SContainer' and CounterName == 'cpuUsageNanoCores' | summarize AggregatedValue = avg(CounterValue) by bin(TimeGenerated, 1m), InstanceName | order by TimeGenerated | where AggregatedValue > 1000000",
+          "timeWindow": 5,
+          "frequency": 5,
+          "severity": "3",
+          "threshold": {
+            "operator": "GreaterThan",
+            "value": 0
+          }
+      }
+    ],
+
+    "apiVersions": {
+      "scheduledQueryRules": "2018-04-16"
+    }
+  },
+  "resources": [
+
+    {
+      "name": "[variables('alerts')[copyIndex()].name]",
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "[variables('apiVersions').scheduledQueryRules]",
+      "location": "[parameters('Location')]",
+      "copy": {
+        "name": "savedSearchCopy",
+        "count": "[length(variables('alerts'))]"
+      },
+      "tags": {
+        "[concat('hidden-link:', variables('workspace').ref)]": "Resource"
+      },
+      "properties": {
+        "description": "[variables('./')[copyIndex()].description]",
+        "enabled": "true",
+        "source": {
+          "query": "[variables('alerts')[copyIndex()].query]",
+          "dataSourceId": "[variables('workspace').ref]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": "[variables('alerts')[copyIndex()].frequency]",
+          "timeWindowInMinutes": "[variables('alerts')[copyIndex()].timeWindow]"
+        },
+        "action": {
+          "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
+          "severity": "[variables('alerts')[copyIndex()].severity]",
+          "aznsAction": {
+            "actionGroup": "[variables('groupIds')]"
+          },
+          "trigger": {
+            "thresholdOperator": "[variables('alerts')[copyIndex()].threshold.operator]",
+            "threshold": "[variables('alerts')[copyIndex()].threshold.value]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+
+  }
+}
