@@ -38,14 +38,13 @@
         "IdString" : "[padLeft(parameters('Id'),3,'0')]",
         "omsWorkspaceName" :"[concat(parameters('Prefix'),'-oms-',variables('IdString'))]",
         "storageAccountName" :"[concat(parameters('Prefix'),'sa',variables('IdString'))]",
-        "saLocation": "[parameters('LocationSA')]"
     },
     "resources": [
         {
             "name": "[variables('storageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2018-07-01",
-            "location": "[variables('saLocation')]",
+            "location": "[parameters('LocationSA')]",
             "properties": {
                 "accessTier": "Hot",
                 "supportsHttpsTrafficOnly": "true"
