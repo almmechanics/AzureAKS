@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "EnvId" : {
+        "Id" : {
             "type": "int",
             "defaultValue": 1
         },
@@ -35,9 +35,9 @@
         }
     },
     "variables": {
-        "IdString" : "[padLeft(parameters('EnvId'),3,'0')]",
+        "IdString" : "[padLeft(parameters('Id'),3,'0')]",
         "omsWorkspaceName" :"[concat(parameters('Prefix'),'-oms-',variables('IdString'))]",
-        "storageAccountName" :"[concat(parameters('Prefix'),'sa',variables('IdString'))]",
+        "storageAccountName" :"[concat(parameters('Prefix'),'sa',variables('IdString'))]"
     },
     "resources": [
         {
