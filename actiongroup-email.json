@@ -6,7 +6,7 @@
         "type": "int",
         "defaultValue": 1
     },
-    "emailAddress": {
+    "EmailAddress": {
       "type": "string"
     },
     "Prefix" : {
@@ -23,7 +23,7 @@
     "shortname": "[concat(parameters('Prefix'),'-age-',variables('IdString'))]",
     "actionGroupShortName": "[if(empty(variables('shortName')), variables('name'), variables('shortName'))]",
     "actionGroup": {
-      "emailAddress": "[parameters('emailAddress')]"
+      "emailAddress": "[parameters('EmailAddress')]"
     },
     "apiVersions": {
       "logicApp": "2017-07-01",
