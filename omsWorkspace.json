@@ -47,7 +47,7 @@
             "location": "[parameters('LocationSA')]",
             "properties": {
                 "accessTier": "Hot",
-                "supportsHttpsTrafficOnly": true
+                "supportsHttpsTrafficOnly": 'True'
             },
             "sku": {
                 "name": "Standard_RAGRS"
