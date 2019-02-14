@@ -1,0 +1,62 @@
+{  
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Id" : {
+        "type": "int",
+        "defaultValue": 1
+    },
+    "emailAddress": {
+      "type": "string"
+    },
+    "Prefix" : {
+      "type" :"string",
+      "defaultValue": "alm"
+    },
+    "Environment" : {
+      "type" :"string"
+    }
+  },
+  "variables": {
+    "IdString" : "[padLeft(parameters('Id'),3,'0')]",
+    "name" :"[concat(parameters('Prefix'),'-ag-email-',variables('IdString'))]",
+    "shortname": "[concat(parameters('Prefix'),'-age-',variables('IdString'))]",
+    "actionGroupShortName": "[if(empty(variables('shortName')), variables('name'), variables('shortName'))]",
+    "actionGroup": {
+      "emailAddress": "[parameters('emailAddress')]"
+    },
+    "apiVersions": {
+      "logicApp": "2017-07-01",
+      "actionGroup": "2018-03-01"
+    },
+    "location": "Global"
+  },
+  "resources": [
+    {
+      "comments": "Action group stating what should be notified when an alert is fired",
+      "type": "Microsoft.Insights/actionGroups",
+      "name": "[variables('name')]",
+      "apiVersion": "[variables('apiVersions').actionGroup]",
+      "location": "[variables('location')]",
+      "tags": {
+        "Environment": "[parameters('Environment')]"
+      },
+      "properties": {
+          "groupShortName": "[toLower(variables('actionGroupShortName'))]",
+          "enabled": true,
+          "emailReceivers": [
+              {
+                  "name": "EmailNotify",
+                  "emailAddress": "[variables('actionGroup').emailAddress]"
+              }
+          ]
+      }
+  }
+  ],
+  "outputs": {
+    "id": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupShortName'))]"
+    }
+  }
+}
