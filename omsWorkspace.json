@@ -19,6 +19,13 @@
                 "description": "Specify the region for your Workspace"
             }
         },
+        "LocationSA": {
+            "type": "string",
+            "defaultValue": "West Europe",
+            "metadata": {
+                "description": "Specify the region for your Storage Account"
+            }
+        },
         "Prefix" : {
             "type" :"string",
             "defaultValue": "alm"
@@ -31,7 +38,7 @@
         "IdString" : "[padLeft(parameters('Id'),3,'0')]",
         "omsWorkspaceName" :"[concat(parameters('Prefix'),'-oms-',variables('IdString'))]",
         "storageAccountName" :"[concat(parameters('Prefix'),'sa',variables('IdString'))]",
-        "saLocation": "uksouth"
+        "saLocation": "[parameters('LocationSA')]"
     },
     "resources": [
         {
