@@ -1,0 +1,102 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Id" : {
+            "type": "int",
+            "defaultValue": 1
+        },
+        "Location": {
+            "type": "string",
+            "defaultValue": "West Europe",
+            "allowedValues": [
+                "East US",
+                "West Europe",
+                "Southeast Asia",
+                "Australia Southeast"
+            ],
+            "metadata": {
+                "description": "Specify the region for your Workspace"
+            }
+        },
+        "Prefix" : {
+            "type" :"string",
+            "defaultValue": "alm"
+        },
+        "Environment" : {
+            "type" :"string"
+        }
+    },
+    "variables": {
+        "IdString" : "[padLeft(parameters('Id'),3,'0')]",
+        "omsWorkspaceName" :"[concat(parameters('Prefix'),'-oms-',variables('IdString'))]",
+        "storageAccountName" :"[concat(parameters('Prefix'),'sa',variables('IdString'))]",
+        "saLocation": "uksouth"
+    },
+    "resources": [
+        {
+            "name": "[variables('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2018-07-01",
+            "location": "[variables('saLocation')]",
+            "properties": {
+                "accessTier": "Hot",
+                "supportsHttpsTrafficOnly": "true"
+            },
+            "sku": {
+                "name": "Standard_RAGRS"
+            },
+            "tags": {
+                "Environment": "[parameters('Environment')]"
+            },
+            "kind": "StorageV2",
+            "resources": [
+                {
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-03-01-preview",
+                    "name": "[concat('default/', variables('omsWorkspaceName'))]",
+                    "dependsOn": [
+                        "[variables('storageAccountName')]"
+                    ],
+                    "properties": {
+                        "publicAccess": "None"
+                    }
+                }
+            ]
+        },
+        {
+            "apiVersion": "2017-03-15-preview",
+            "location": "[parameters('Location')]",
+            "name": "[variables('omsWorkspaceName')]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "comments": "Log Analytics workspace",
+            "tags": {
+                "Environment": "[parameters('Environment')]"
+            },
+            "properties": {
+                "sku": {
+                        "name": "pergb2018"
+                    },
+                "retentionInDays": 180
+            },
+            "resources": [
+                {
+                    "name": "AzureActivityLog",
+                    "type": "datasources",
+                    "apiVersion": "2015-11-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+                    ],
+                    "kind": "AzureActivityLog",
+                    "properties": {
+                        "linkedResourceId": "[concat(subscription().id, '/providers/Microsoft.Insights/eventTypes/management')]"
+                    }
+                }
+            ],
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+            ]
+        }
+    ],
+    "outputs": {}
+}
