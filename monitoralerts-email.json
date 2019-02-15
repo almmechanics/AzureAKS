@@ -61,7 +61,7 @@
         "[concat('hidden-link:', variables('workspace').ref)]": "Resource"
       },
       "properties": {
-        "description": "[variables('./')[copyIndex()].description]",
+        "description": "[variables('alerts')[copyIndex()].description]",
         "enabled": "true",
         "source": {
           "query": "[variables('alerts')[copyIndex()].query]",
